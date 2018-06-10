@@ -1,5 +1,7 @@
 # TransferDynamicBones
 
+# Always back up your avatars before using! You never know what could go wrong.
+
 To use:
 - Add to your VRChat avatar
 - Add your base model into the provided box
