@@ -64,6 +64,7 @@ public class TransferDynamicBonesEditor : Editor
     {
         try
         {
+            // Get required base and target components
             _baseAnim = _baseAvatar.GetComponent<Animator>();
             _baseAllBones = _baseAnim.GetComponentsInChildren<Transform>().ToList();
 
@@ -78,36 +79,39 @@ public class TransferDynamicBonesEditor : Editor
             var filteredBaseBones = _baseAllBones.Where(item =>
                 _targetAllBones.Any(category => category.name.Equals(item.name))).ToList();
 
-            //var newColliders = new List<DynamicBoneCollider>();
+            // List for assigning new colliders
+            var targetColliders = new List<DynamicBoneColliderBase>();
 
             foreach (var baseBone in filteredBaseBones)
             {
 
-                //DynamicBoneCollider collider;
-                //if (baseBone.gameObject.GetComponent<DynamicBoneCollider>() != null)
-                //{
-                //    var targetBone = filteredTargetBones.First(x => x.name == baseBone.name).gameObject.transform;
-                //    var baseCollider = baseBone.gameObject.GetComponent<DynamicBoneCollider>();
-                //    var targetCollider = targetBone.GetComponent<DynamicBoneCollider>();
-                //    if (baseCollider == null)
-                //    {
-                //        Debug.Log("Base collider is null");
-                //        continue;
-                //    }
-                //    if (targetCollider == null)
-                //    {
-                //        Debug.Log("Targ Bone is null, adding dynamic bone");
-                //        targetCollider = filteredTargetBones.First(x => x.name == baseBone.name).gameObject
-                //            .AddComponent<DynamicBoneCollider>();
-                //    }
-                //    foreach (var f in baseCollider.GetType().GetFields())
-                //    {
-                //        f.SetValue(targetCollider, f.GetValue(baseCollider));
-                //    }
+                // Get all attached colliders on single bone
+                if (baseBone.gameObject.GetComponent<DynamicBoneCollider>() != null)
+                {
+                    var targetBone = filteredTargetBones.First(x => x.name == baseBone.name).gameObject.transform;
+                    var baseCollider = baseBone.gameObject.GetComponent<DynamicBoneCollider>();
+                    var targetCollider = targetBone.GetComponent<DynamicBoneCollider>();
 
-                //    newColliders.Add(targetCollider);
-                //}
+                    if (baseCollider == null)
+                    {
+                        Debug.Log("No Base collider to transfer");
+                        continue;
+                    }
+                    if (targetCollider == null)
+                    {
+                        Debug.Log("Targ Bone is null, adding dynamic bone");
+                        targetCollider = filteredTargetBones.First(x => x.name == baseBone.name).gameObject
+                            .AddComponent<DynamicBoneCollider>();
+                    }
+                    // Copy component values
+                    foreach (var f in baseCollider.GetType().GetFields())
+                    {
+                        f.SetValue(targetCollider, f.GetValue(baseCollider));
+                    }
+                    targetColliders.Add(targetCollider);
+                }
 
+                // Get dynamic bones and copy settings
                 if (baseBone.gameObject.GetComponent<DynamicBone>() != null)
                 {
                     var targetBone = filteredTargetBones.First(x => x.name == baseBone.name).gameObject.transform;
@@ -124,20 +128,33 @@ public class TransferDynamicBonesEditor : Editor
                         targetDynBone = filteredTargetBones.First(x => x.name == baseBone.name).gameObject
                             .AddComponent<DynamicBone>();
                     }
+                    // Copy component values
                     foreach (var f in baseDynBone.GetType().GetFields())
                     {
                         f.SetValue(targetDynBone, f.GetValue(baseDynBone));
                     }
 
+                    // Update root and colliders on new bone to target's bone
                     targetDynBone.m_Root = targetBone;
-                    //if (targetDynBone.m_Colliders.Count > 0)
-                    //{
+                    var targetPerBoneColliders = new List<DynamicBoneColliderBase>();
 
-                    //}
-                    Debug.Log("Got base bobe: " + baseDynBone.name + " from: " +baseDynBone.transform.root.name +
-                              "\nGot targ bone: " + targetDynBone.name+ " from "+ targetDynBone.transform.root.name);
+                    // Probably a better way to do this OMEGALUL
+                    // Compare colliders and add if they match.
+                    foreach (var baseCollider in baseDynBone.m_Colliders)
+                    {
+                        foreach (var targetCollider in targetDynBone.m_Colliders)
+                        {
+                            if (baseCollider.Equals(targetCollider))
+                            {
+                                targetPerBoneColliders.Add(targetCollider);
+                            }
+                        }
+                    }
+                    targetDynBone.m_Colliders = targetPerBoneColliders;
+
+                    //Debug.Log("Got base bobe: " + baseDynBone.name + " from: " +baseDynBone.transform.root.name +
+                    //          "\nGot targ bone: " + targetDynBone.name+ " from "+ targetDynBone.transform.root.name);
                 }
-
             }
             Cleanup();
         }
