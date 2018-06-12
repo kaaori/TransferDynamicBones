@@ -7,7 +7,8 @@ To use:
 - Add your base model into the provided box
 - Click Transfer button and enjoy.
 
-It will also transfer your dynamic bone colliders, though some manual adjustment may be needed.
+*Transfers colliders and exclusions as well*
+Some manual tweaking may be needed on the colliders, depending on how you set them up.
 
 # Things
 - Transferring between differently scaled models may need some things (Like radii, offsets, and other non-scaled factors) to be manually changed 
