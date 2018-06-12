@@ -94,12 +94,12 @@ public class TransferDynamicBonesEditor : Editor
 
                     if (baseCollider == null)
                     {
-                        Debug.Log("No Base collider to transfer");
+                        //Debug.Log("No Base collider to transfer");
                         continue;
                     }
                     if (targetCollider == null)
                     {
-                        Debug.Log("Targ Bone is null, adding dynamic bone");
+                        //Debug.Log("Targ Bone is null, adding dynamic bone");
                         targetCollider = filteredTargetBones.First(x => x.name == baseBone.name).gameObject
                             .AddComponent<DynamicBoneCollider>();
                     }
@@ -137,20 +137,33 @@ public class TransferDynamicBonesEditor : Editor
                     // Update root and colliders on new bone to target's bone
                     targetDynBone.m_Root = targetBone;
                     var targetPerBoneColliders = new List<DynamicBoneColliderBase>();
+                    var targetPerBoneExclusion = new List<Transform>();
 
                     // Probably a better way to do this OMEGALUL
                     // Compare colliders and add if they match.
-                    foreach (var baseCollider in baseDynBone.m_Colliders)
+                    if (baseDynBone.m_Colliders.Count >= 0)
                     {
-                        foreach (var targetCollider in targetDynBone.m_Colliders)
+                        foreach (var baseCollider in baseDynBone.m_Colliders)
                         {
-                            if (baseCollider.Equals(targetCollider))
+                            foreach (var targetCollider in targetColliders)
                             {
-                                targetPerBoneColliders.Add(targetCollider);
+                                if (baseCollider.name.Equals(targetCollider.name))
+                                {
+                                    targetPerBoneColliders.Add(targetCollider);
+                                }
                             }
                         }
+                        targetDynBone.m_Colliders = targetPerBoneColliders;
                     }
-                    targetDynBone.m_Colliders = targetPerBoneColliders;
+
+                    if (baseDynBone.m_Exclusions.Count >= 0)
+                    {
+                        foreach (var baseExclusion in baseDynBone.m_Exclusions)
+                        {
+                            targetPerBoneExclusion.Add(filteredTargetBones.First(x => x.name == baseExclusion.gameObject.name).gameObject.transform);
+                        }
+                        targetDynBone.m_Exclusions = targetPerBoneExclusion;
+                    }
 
                     //Debug.Log("Got base bobe: " + baseDynBone.name + " from: " +baseDynBone.transform.root.name +
                     //          "\nGot targ bone: " + targetDynBone.name+ " from "+ targetDynBone.transform.root.name);
