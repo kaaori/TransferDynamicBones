@@ -71,6 +71,10 @@ public class TransferDynamicBonesEditor : Editor
             _targetAnim = obj.gameObject.GetComponent<Animator>();
             _targetAllBones = _targetAnim.GetComponentsInChildren<Transform>().ToList();
 
+            var baseObjName = _baseAnim.gameObject.name;
+            _targetAnim.gameObject.name = baseObjName;
+            _baseAllBones.Add(_baseAnim.gameObject.transform);
+
             // Filter to only matching bones on target model
             var filteredTargetBones = _targetAllBones.Where(item =>
                 _baseAllBones.Any(category => category.name.Equals(item.name))).ToList();
