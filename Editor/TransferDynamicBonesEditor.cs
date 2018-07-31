@@ -219,6 +219,10 @@ public class TransferDynamicBonesEditor : Editor
                     {
                         foreach (var baseExclusion in baseDynBone.m_Exclusions)
                         {
+                            if (baseExclusion == null || filteredTargetBones.Count <= 0)
+                            {
+                                continue;
+                            }
                             var targetExclusion = filteredTargetBones
                                 .FirstOrDefault(x => x.name == baseExclusion.gameObject.name);
                             if (targetExclusion == null)
@@ -244,7 +248,7 @@ public class TransferDynamicBonesEditor : Editor
         }
         catch (System.Exception ex)
         {
-            Debug.Log("ERROR: "+ex);
+            Debug.LogError("ERROR: "+ex);
         }
     }
 
