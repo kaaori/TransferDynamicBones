@@ -182,6 +182,7 @@ public class TransferDynamicBonesEditor : Editor
                     if (targetDynBone == null)
                     {
                         //Debug.Log("Targ Bone is null, adding dynamic bone");
+
                         targetDynBone = filteredTargetBones.First(x => x.name == baseBone.name).gameObject
                             .AddComponent<DynamicBone>();
                     }
@@ -218,7 +219,13 @@ public class TransferDynamicBonesEditor : Editor
                     {
                         foreach (var baseExclusion in baseDynBone.m_Exclusions)
                         {
-                            targetPerBoneExclusions.Add(filteredTargetBones.First(x => x.name == baseExclusion.gameObject.name).gameObject.transform);
+                            var targetExclusion = filteredTargetBones
+                                .FirstOrDefault(x => x.name == baseExclusion.gameObject.name);
+                            if (targetExclusion == null)
+                            {
+                                continue;
+                            }
+                            targetPerBoneExclusions.Add(targetExclusion.gameObject.transform);
                         }
                         targetDynBone.m_Exclusions = targetPerBoneExclusions;
                     }
